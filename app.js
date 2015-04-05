@@ -21,6 +21,13 @@ var cliTable = require("cli-table");
 
 var argv = process.argv.slice(2);
 
+if (argv.length === 0) {
+  console.log("Usage: sccli [command]");
+  console.log("Commands:");
+  console.log("  test     list all tests");
+  process.exit(0);
+}
+
 if (argv[0] === "test" && argv.length === 1) {
   statuscake.tests(function (err, data) {
     var table = new cliTable({
