@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/pm5/node-statuscake-cli/issues"
   },
-  "homepage": "https://github.com/pm5/node-statuscake-cli"
+  "homepage": "https://github.com/pm5/node-statuscake-cli",
+  "dependencies": {
+    "cli-table": "^0.3.1",
+    "statuscake": "^0.1.0"
+  }
 }
