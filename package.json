@@ -2,7 +2,12 @@
   "name": "node-statuscake-cli",
   "version": "0.0.0",
   "description": "A CLI for StatusCake",
-  "main": "index.js",
+  "directories": {
+    "bin": "./bin"
+  },
+  "bin": {
+    "sccli": "./bin/sccli"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

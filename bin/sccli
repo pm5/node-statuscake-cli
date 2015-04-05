@@ -1,0 +1,4 @@
+#!/bin/sh
+':' //; exec "`command -v node || command -v nodejs`" "$0" "$@"
+
+require("../app.js");
