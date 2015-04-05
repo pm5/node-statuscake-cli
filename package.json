@@ -1,5 +1,5 @@
 {
-  "name": "node-statuscake-cli",
+  "name": "statuscake-cli",
   "version": "0.0.1",
   "description": "A CLI for StatusCake",
   "directories": {
