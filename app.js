@@ -16,11 +16,13 @@ var conf = require(confFile);
 
 var yargs = require('yargs')
   .usage('Usage: sccli <cmd> <subcmd>')
+  .command('alert', 'list recent alerts')
   .command('test', 'list all tests')
   .command('test <id>', 'show details of a test')
   .command('test add', 'add a test')
   .command('test remove <id>', 'remove a test')
   .command('test update <id>', 'update a test')
+  .command('contact', 'list all contact groups')
   .demand(1, 'Error: must provide a valid command.'),
   argv = yargs.argv,
   cmd = argv._[0],
@@ -89,6 +91,30 @@ if (cmd === "test" && subcmd === undefined) {
       return;
     }
     console.log(res.Message);
+  });
+} else if (cmd === "contact") {
+  statuscake.contactGroups(function (err, data) {
+    var table = new cliTable({
+      head: ["GroupName", "ContactID", "Emails"]
+    });
+    data.forEach(function (d) {
+      table.push([
+        d.GroupName, d.ContactID, d.Emails.map(function (e) { return e.trim(); }).join("\n")
+      ]);
+    });
+    console.log(table.toString());
+  });
+} else if (cmd === "alert") {
+  statuscake.alerts(function (err, data) {
+    var table = new cliTable({
+      head: ["Triggered", "Status", "TestID"]
+    });
+    data.slice(0, 8).forEach(function (d) {
+      table.push([
+        d.Triggered, d.Status, d.TestID
+      ]);
+    });
+    console.log(table.toString());
   });
 } else {
   yargs.showHelp();
