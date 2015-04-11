@@ -14,25 +14,24 @@ if (! fs.existsSync(confFile)) {
 
 var conf = require(confFile);
 
+var yargs = require('yargs')
+  .usage('Usage: sccli <cmd> <subcmd>')
+  .command('test', 'list all tests')
+  .command('test <id>', 'show details of a test')
+  .command('test add', 'add a test')
+  .command('test remove <id>', 'remove a test')
+  .command('test edit <id>', 'edit a test')
+  .demand(1, 'Error: must provide a valid command.'),
+  argv = yargs.argv,
+  cmd = argv._[0],
+  subcmd = argv._[1];
+
 var statuscake = require("statuscake")
   .username(conf.username)
   .key(conf.key);
 var cliTable = require("cli-table");
 
-var argv = process.argv.slice(2);
-
-if (argv.length === 0) {
-  console.log("Usage: sccli [command]");
-  console.log("Commands:");
-  console.log("  test               list all tests");
-  console.log("  test <id>          show details of a test");
-  console.log("  test add           add a test");
-  console.log("  test remove <id>   remove a test");
-  console.log("  test edit <id>     edit a test");
-  process.exit(0);
-}
-
-if (argv[0] === "test" && argv.length === 1) {
+if (cmd === "test" && subcmd === undefined) {
   statuscake.tests(function (err, data) {
     var table = new cliTable({
       head: ["TestID", "WebsiteName", "Status", "Uptime"],
@@ -44,14 +43,49 @@ if (argv[0] === "test" && argv.length === 1) {
     });
     console.log(table.toString());
   });
-} else if (argv[0] === "test" && argv.length === 2) {
-  statuscake.testsDetails(parseInt(argv[1]), function (err, data) {
+} else if (cmd === "test" && ! isNaN(parseInt(subcmd))) {
+  statuscake.testsDetails(parseInt(subcmd), function (err, data) {
     var table = new cliTable();
-    ["TestID", "WebsiteName", "URI", "Method", "Uptime", "DownTimes", "LastTested", "ContactGroup"].forEach(function (name) {
+    ["TestID", "WebsiteName", "URI", "Method", "CheckRate", "Uptime", "DownTimes", "LastTested", "TestType", "ContactGroup"].forEach(function (name) {
       var d = {};
       d[name] = data[name] || "";
       table.push(d);
     });
     console.log(table.toString());
   });
+} else if (cmd === "test" && (subcmd === "add" || subcmd === "update")) {
+  var data = {
+    WebsiteName:  argv.name,
+    WebsiteURL:   argv.url,
+    CheckRate:    argv["check-rate"] || 300,
+    TestType:     argv["test-type"] || 'HTTP',
+  };
+  if (subcmd === "update") {
+    data.TestID === argv._[2];
+  }
+  ["Paused", "Port", "NodeLocations", "Timeout", "PingURL", "Confirmation", "BasicUser", "BasicPass", "Public", "LogoImage", "Branding", "WebsiteHost", "Virus", "FindString", "DoNotFind", "ContactGroup", "RealBrowser", "TriggerRate", "TestTags"].forEach(function (field) {
+    data[field] = argv[field.replace(/^([A-Z]+)/, "--$1").replace(/^([A-Z]+)/g, "-$1").toLowerCase()];
+  });
+  statuscake.testsUpdate(data, function (err, res) {
+    if (res.Success) {
+      if (subcmd === "add") {
+        console.log("Test added with ID " + res.InsertID + ".");
+      } else {
+        console.log("Test with ID " + res.InsertID + " updated.");
+      }
+      return;
+    }
+    console.log(res.Message);
+  });
+} else if (cmd === "test" && subcmd === "remove") {
+  var id = argv._[2];
+  statuscake.testsDelete(id, function (err, res) {
+    if (res.Success) {
+      console.log("Test " + id + " successfully deleted.");
+      return;
+    }
+    console.log(res.Message);
+  });
+} else {
+  yargs.showHelp();
 }
