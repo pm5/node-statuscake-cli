@@ -15,7 +15,7 @@ if (! fs.existsSync(confFile)) {
 var conf = require(confFile);
 
 var yargs = require('yargs')
-  .usage('Usage: sccli <cmd> <subcmd>')
+  .usage('Usage: sccli <cmd> <subcmd> [-j]')
   .command('alert', 'list recent alerts')
   .command('test', 'list all tests')
   .command('test <id>', 'show details of a test')
@@ -23,7 +23,8 @@ var yargs = require('yargs')
   .command('test remove <id>', 'remove a test')
   .command('test update <id>', 'update a test')
   .command('contact', 'list all contact groups')
-  .demand(1, 'Error: must provide a valid command.'),
+  .demand(1, 'Error: must provide a valid command.')
+  .boolean('j', 'JSON output'),
   argv = yargs.argv,
   cmd = argv._[0],
   subcmd = argv._[1];
@@ -35,6 +36,10 @@ var cliTable = require("cli-table");
 
 if (cmd === "test" && subcmd === undefined) {
   statuscake.tests(function (err, data) {
+    if (argv.j) {
+      console.log(data);
+      return;
+    }
     var table = new cliTable({
       head: ["TestID", "WebsiteName", "Status", "Uptime", "ContactGroup"],
     });
@@ -48,6 +53,10 @@ if (cmd === "test" && subcmd === undefined) {
   });
 } else if (cmd === "test" && ! isNaN(parseInt(subcmd))) {
   statuscake.testsDetails(parseInt(subcmd), function (err, data) {
+    if (argv.j) {
+      console.log(data);
+      return;
+    }
     var table = new cliTable();
     ["TestID", "WebsiteName", "URI", "Method", "CheckRate", "Uptime", "DownTimes", "LastTested", "TestType", "ContactGroup", "TestTags"].forEach(function (name) {
       var d = {};
@@ -73,6 +82,10 @@ if (cmd === "test" && subcmd === undefined) {
     }
   });
   statuscake.testsUpdate(data, function (err, res) {
+    if (argv.j) {
+      console.log(res);
+      return;
+    }
     if (res.Success) {
       if (subcmd === "add") {
         console.log("Test added with ID " + res.InsertID + ".");
@@ -86,6 +99,10 @@ if (cmd === "test" && subcmd === undefined) {
 } else if (cmd === "test" && subcmd === "remove") {
   var id = argv._[2];
   statuscake.testsDelete(id, function (err, res) {
+    if (argv.j) {
+      console.log(res);
+      return;
+    }
     if (res.Success) {
       console.log("Test " + id + " successfully deleted.");
       return;
@@ -94,6 +111,10 @@ if (cmd === "test" && subcmd === undefined) {
   });
 } else if (cmd === "contact") {
   statuscake.contactGroups(function (err, data) {
+    if (argv.j) {
+      console.log(data);
+      return;
+    }
     var table = new cliTable({
       head: ["GroupName", "ContactID", "Emails"]
     });
@@ -106,6 +127,10 @@ if (cmd === "test" && subcmd === undefined) {
   });
 } else if (cmd === "alert") {
   statuscake.alerts(function (err, data) {
+    if (argv.j) {
+      console.log(data);
+      return;
+    }
     var table = new cliTable({
       head: ["Triggered", "Status", "TestID"]
     });
