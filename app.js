@@ -23,8 +23,9 @@ var yargs = require('yargs')
   .command('test remove <id>', 'remove a test')
   .command('test update <id>', 'update a test')
   .command('contact', 'list all contact groups')
-  .demand(1, 'Error: must provide a valid command.')
-  .boolean('j', 'JSON output'),
+  .describe('j', 'JSON output')
+  .help('h').alias('h', 'help')
+  .demand(1, 'Error: must provide a valid command.'),
   argv = yargs.argv,
   cmd = argv._[0],
   subcmd = argv._[1];
