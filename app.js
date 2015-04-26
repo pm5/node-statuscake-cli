@@ -45,7 +45,6 @@ if (cmd === "test" && subcmd === undefined) {
       head: ["TestID", "WebsiteName", "Status", "Uptime", "ContactGroup"],
     });
     data.forEach(function (d) {
-      console.log(d);
       table.push([
         d.TestID, d.WebsiteName, d.Status, d.Uptime, (d.ContactGroup || '') + ' (' + d.ContactID + ')'
       ]);
