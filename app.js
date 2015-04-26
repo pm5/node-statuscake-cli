@@ -35,10 +35,24 @@ var statuscake = require("statuscake")
   .key(conf.key);
 var cliTable = require("cli-table");
 
+var output = function (content) {
+  console.log(content);
+};
+
+if (argv.j) {
+  output = function (content) {
+    console.log(JSON.stringify(content));
+  }
+}
+
+var message = function (content) {
+  console.log(content);
+};
+
 if (cmd === "test" && subcmd === undefined) {
   statuscake.tests(function (err, data) {
     if (argv.j) {
-      console.log(data);
+      output(data);
       return;
     }
     var table = new cliTable({
@@ -49,12 +63,12 @@ if (cmd === "test" && subcmd === undefined) {
         d.TestID, d.WebsiteName, d.Status, d.Uptime, (d.ContactGroup || '') + ' (' + d.ContactID + ')'
       ]);
     });
-    console.log(table.toString());
+    output(table.toString());
   });
 } else if (cmd === "test" && ! isNaN(parseInt(subcmd))) {
   statuscake.testsDetails(parseInt(subcmd), function (err, data) {
     if (argv.j) {
-      console.log(data);
+      output(data);
       return;
     }
     var table = new cliTable();
@@ -63,7 +77,7 @@ if (cmd === "test" && subcmd === undefined) {
       d[name] = data[name] || "";
       table.push(d);
     });
-    console.log(table.toString());
+    output(table.toString());
   });
 } else if (cmd === "test" && (subcmd === "add" || subcmd === "update")) {
   var data = {
@@ -83,36 +97,36 @@ if (cmd === "test" && subcmd === undefined) {
   });
   statuscake.testsUpdate(data, function (err, res) {
     if (argv.j) {
-      console.log(res);
+      output(res);
       return;
     }
     if (res.Success) {
       if (subcmd === "add") {
-        console.log("Test added with ID " + res.InsertID + ".");
+        message("Test added with ID " + res.InsertID + ".");
       } else {
-        console.log("Test with ID " + data.TestID + " updated.");
+        message("Test with ID " + data.TestID + " updated.");
       }
       return;
     }
-    console.log(res.Message);
+    message(res.Message);
   });
 } else if (cmd === "test" && subcmd === "remove") {
   var id = argv._[2];
   statuscake.testsDelete(id, function (err, res) {
     if (argv.j) {
-      console.log(res);
+      output(res);
       return;
     }
     if (res.Success) {
-      console.log("Test " + id + " successfully deleted.");
+      message("Test " + id + " successfully deleted.");
       return;
     }
-    console.log(res.Message);
+    message(res.Message);
   });
 } else if (cmd === "contact") {
   statuscake.contactGroups(function (err, data) {
     if (argv.j) {
-      console.log(data);
+      output(data);
       return;
     }
     var table = new cliTable({
@@ -123,12 +137,12 @@ if (cmd === "test" && subcmd === undefined) {
         d.GroupName, d.ContactID, d.Emails.map(function (e) { return e.trim(); }).join("\n")
       ]);
     });
-    console.log(table.toString());
+    output(table.toString());
   });
 } else if (cmd === "alert") {
   statuscake.alerts(function (err, data) {
     if (argv.j) {
-      console.log(data);
+      output(data);
       return;
     }
     var table = new cliTable({
@@ -139,7 +153,7 @@ if (cmd === "test" && subcmd === undefined) {
         d.Triggered, d.Status, d.TestID
       ]);
     });
-    console.log(table.toString());
+    output(table.toString());
   });
 } else {
   yargs.showHelp();
