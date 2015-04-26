@@ -89,7 +89,7 @@ if (cmd === "test" && subcmd === undefined) {
   if (subcmd === "update") {
     data.TestID = argv._[2];
   }
-  ["Paused", "Port", "NodeLocations", "Timeout", "PingURL", "Confirmation", "BasicUser", "BasicPass", "Public", "LogoImage", "Branding", "WebsiteHost", "Virus", "FindString", "DoNotFind", "ContactGroup", "RealBrowser", "TriggerRate", "TestTags"].forEach(function (field) {
+  ["Paused", "WebsiteName", "Port", "NodeLocations", "Timeout", "PingURL", "Confirmation", "BasicUser", "BasicPass", "Public", "LogoImage", "Branding", "WebsiteHost", "Virus", "FindString", "DoNotFind", "ContactGroup", "RealBrowser", "TriggerRate", "TestTags"].forEach(function (field) {
     var argName = field[0].toLowerCase().concat(field.substr(1));
     if (argv[argName] !== undefined) {
       data[field] = argv[argName];
