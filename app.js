@@ -23,6 +23,7 @@ var yargs = require('yargs')
   .command('test remove <id>', 'remove a test')
   .command('test update <id>', 'update a test')
   .command('contact', 'list all contact groups')
+  .command('location', 'list all server location')
   .describe('j', 'JSON output')
   .help('h').alias('h', 'help')
   .demand(1, 'Error: must provide a valid command.'),
@@ -152,6 +153,19 @@ if (cmd === "test" && subcmd === undefined) {
       table.push([
         d.Triggered, d.Status, d.TestID
       ]);
+    });
+    output(table.toString());
+  });
+} else if (cmd === "location") {
+  statuscake.locationsJSON(function (err, data) {
+    if (argv.j) {
+      output(data);
+      return;
+    }
+    var head = ["guid", "servercode", "title", "ip", "countryiso", "status"];
+    var table = new cliTable({head: head});
+    Object.keys(data).forEach(function (key) {
+      table.push(head.map(function (h) { return data[key][h]; }))
     });
     output(table.toString());
   });
