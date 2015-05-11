@@ -17,7 +17,7 @@ var conf = require(confFile);
 var yargs = require('yargs')
   .usage('Usage: sccli <cmd> <subcmd> [-j]')
   .command('alert', 'list recent alerts')
-  .command('test', 'list all tests')
+  .command('test [-d]', 'list all tests')
   .command('test <id>', 'show details of a test')
   .command('test add', 'add a test')
   .command('test remove <id>', 'remove a test')
@@ -25,6 +25,7 @@ var yargs = require('yargs')
   .command('contact', 'list all contact groups')
   .command('location', 'list all server location')
   .describe('j', 'JSON output')
+  .describe('d', 'show only tests that are down')
   .help('h').alias('h', 'help')
   .demand(1, 'Error: must provide a valid command.'),
   argv = yargs.argv,
@@ -52,6 +53,11 @@ var message = function (content) {
 
 if (cmd === "test" && subcmd === undefined) {
   statuscake.tests(function (err, data) {
+    if (argv.d) {
+      data = data.filter(function (d) {
+        return d.Status === "Down"
+      })
+    }
     if (argv.j) {
       output(data);
       return;
