@@ -22,14 +22,53 @@ var conf = require(confFile),
 
 var yargs = require('yargs')
     .usage('Usage: sccli <cmd> <subcmd> [-j]')
-    .command('alert', 'list recent alerts')
+    .command('alert', 'list recent alerts', function (yargs) {
+      statuscake.alerts(function (err, data) {
+        if (err) return message(err)
+        if (argv.j) return output(data)
+        var table = new CliTable({
+          head: ['Triggered', 'Status', 'TestID']
+        })
+        data.slice(0, 8).forEach(function (d) {
+          table.push([
+            d.Triggered, d.Status, d.TestID
+          ])
+        })
+        output(table.toString())
+      })
+    })
     .command('test [-d]', 'list all tests')
     .command('test <id>', 'show details of a test')
     .command('test add', 'add a test')
     .command('test remove <id>', 'remove a test')
     .command('test update <id>', 'update a test')
-    .command('contact', 'list all contact groups')
-    .command('location', 'list all server location')
+    .command('contact', 'list all contact groups', function (yargs) {
+      statuscake.contactGroups(function (err, data) {
+        if (err) return message(err)
+        if (argv.j) return output(data)
+        var table = new CliTable({
+          head: ['GroupName', 'ContactID', 'Emails']
+        })
+        data.forEach(function (d) {
+          table.push([
+            d.GroupName, d.ContactID, d.Emails.map(function (e) { return e.trim() }).join('\n')
+          ])
+        })
+        output(table.toString())
+      })
+    })
+    .command('location', 'list all server location', function (yargs) {
+      statuscake.locationsJSON(function (err, data) {
+        if (err) return message(err)
+        if (argv.j) return output(data)
+        var head = ['guid', 'servercode', 'title', 'ip', 'countryiso', 'status']
+        var table = new CliTable({head: head})
+        Object.keys(data).forEach(function (key) {
+          table.push(head.map(function (h) { return data[key][h] }))
+        })
+        output(table.toString())
+      })
+    })
     .describe('j', 'JSON output')
     .describe('d', 'show only tests that are down')
     .help('h').alias('h', 'help')
@@ -126,54 +165,6 @@ if (cmd === 'test' && subcmd === undefined) {
       return
     }
     message(res.Message)
-  })
-} else if (cmd === 'contact') {
-  statuscake.contactGroups(function (err, data) {
-    if (err) return message(err)
-    if (argv.j) {
-      output(data)
-      return
-    }
-    var table = new CliTable({
-      head: ['GroupName', 'ContactID', 'Emails']
-    })
-    data.forEach(function (d) {
-      table.push([
-        d.GroupName, d.ContactID, d.Emails.map(function (e) { return e.trim() }).join('\n')
-      ])
-    })
-    output(table.toString())
-  })
-} else if (cmd === 'alert') {
-  statuscake.alerts(function (err, data) {
-    if (err) return message(err)
-    if (argv.j) {
-      output(data)
-      return
-    }
-    var table = new CliTable({
-      head: ['Triggered', 'Status', 'TestID']
-    })
-    data.slice(0, 8).forEach(function (d) {
-      table.push([
-        d.Triggered, d.Status, d.TestID
-      ])
-    })
-    output(table.toString())
-  })
-} else if (cmd === 'location') {
-  statuscake.locationsJSON(function (err, data) {
-    if (err) return message(err)
-    if (argv.j) {
-      output(data)
-      return
-    }
-    var head = ['guid', 'servercode', 'title', 'ip', 'countryiso', 'status']
-    var table = new CliTable({head: head})
-    Object.keys(data).forEach(function (key) {
-      table.push(head.map(function (h) { return data[key][h] }))
-    })
-    output(table.toString())
   })
 } else {
   yargs.showHelp()
